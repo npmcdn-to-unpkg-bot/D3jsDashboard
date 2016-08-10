@@ -7,9 +7,6 @@
 <meta
 	content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
 	name='viewport'>
-<meta name="description" content="Developed By M Abdur Rokib Promy">
-<meta name="keywords"
-	content="Admin, Bootstrap 3, Template, Theme, Responsive">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <!-- bootstrap 3.0.2 -->
@@ -48,6 +45,195 @@
 <script src="c3/c3.min.js"></script>
 </head>
 <body class="skin-black">
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="c3/c3.min.js"></script>
+	<script>
+
+    d3.csv("customer_walk_flat_file.csv", function (error, csv_data) {
+        var modData = [];
+        var category = [];
+        var item = [];
+        var donutData = d3.nest()
+                .key(function (d) {
+                    return d.Transaction_Type;
+                })
+                .rollup(function (d) {
+                    return d3.sum(d, function (g) {
+                        return 1;
+                    });
+                }).entries(csv_data);
+
+        console.log(donutData);
+
+        donutData.filter(function (d) {
+            return (d.key == "New" || d.key == "Lost")
+        })
+                .forEach(function (d, i) {
+            console.log(d.key)
+            var item = [d.key];
+            item.push(d.values);
+            modData.push(item);
+        });
+
+        var donutChart = c3.generate({
+            data: {
+                columns: modData,
+                //mimeType: 'json'
+                type: 'donut',
+                onclick: function (d, i) {
+                    console.log("onclick", d, i);
+                },
+                onmouseover: function (d, i) {
+                    console.log("onmouseover", d, i);
+                },
+                onmouseout: function (d, i) {
+                    console.log("onmouseout", d, i);
+                }
+            },
+            donut: {
+                title: "Customer"
+            },
+            bindto: "#chart"
+        });
+
+
+                       modData = [];
+                       category = [];
+                       item = [];
+                        var totalLineData = d3
+                                .nest()
+                                .key(
+                                        function (d) {
+                                            var parseDate = d3.time.format("%m/%d/%Y").parse;
+                                            var monthYear = d3.time.format("%b-%Y")(new Date(parseDate(d.Transaction_Date)));
+                                            return monthYear;
+                                        })
+                                .rollup(
+                                        function (d) {
+                                            return d3
+                                                    .sum(
+                                                            d,
+                                                            function (g) {
+                                                                return 1;
+                                                            });
+                                        })
+                                .entries(
+                                        csv_data);
+
+              //          console.log(data);
+                        item = ["Total Customer Count"];
+                        var totalCount = 0;
+        totalLineData
+                                .forEach(function (d, i) {
+                                    console
+                                            .log(d.key);
+                                    category
+                                            .push(d.key);
+                                    totalCount = totalCount + d.values;
+                                    item
+                                            .push(totalCount);
+
+                                });
+                        modData.push(item);
+
+                //        console.log(category);
+                  //      console.log(modData);
+                        var totalLineChart = c3
+                                .generate({
+                                    data: {
+                                        columns: modData
+
+                                    },
+                                    axis: {
+                                        x: {
+                                            type: 'category',
+                                            categories: category
+                                        },
+                                        y : {
+                                            tick: {
+                                                // count: 20
+
+                                            }
+                                        }},
+                                    bindto: '#chart1'
+                                });
+
+                        modData = [];
+                        category = [];
+                        item = [];
+                        //var data = csv_data.filter(function(d) { return (d.Transaction_Type == "New" || d.Transaction_Type == "Lost");});
+                     //   console.log(csv_data);
+                        var categoryLineData = d3
+                                .nest()
+
+                                .key(function (d) {
+                                    return d.Transaction_Type;
+                                })
+                                .rollup(
+                                        function (d) {
+
+                                            var subData = d3
+                                                    .nest()
+                                                    .key(
+                                                            function (d) {
+                                                                var parseDate = d3.time.format("%m/%d/%Y").parse;
+                                                                var monthYear = d3.time.format("%b-%Y")(new Date(parseDate(d.Transaction_Date)));
+                                                                return monthYear;
+                                                            })
+                                                    .rollup(
+                                                            function (d) {
+                                                                return d3
+                                                                        .sum(
+                                                                                d,
+                                                                                function (g) {
+                                                                                    return 1;
+                                                                                });
+                                                            })
+                                                    .entries(
+                                                            d);
+                                            return subData;
+                                        })
+
+                                .entries(
+                                        csv_data);
+                        //                            console.log(data);
+        categoryLineData.filter(function (d) {
+                            return (d.key == "New" || d.key == "Lost")
+                        })
+                                .forEach(function (d, i) {
+                                    item = [];
+                                    category = [];
+                                    item.push(d.key);
+                                    //                                          console.log(d.key);
+
+                                    d.values.forEach(function (k, l) {
+
+                                        category
+                                                .push(k.key);
+                                        item
+                                                .push(k.values);
+
+                                    });
+                                    modData.push(item);
+                                });
+//							console.log(category);
+//							console.log(modData);
+                        var categoryLineChart = c3
+                                .generate({
+                                    data: {
+                                        columns: modData
+
+                                    },
+                                    axis: {
+                                        x: {
+                                            type: 'category',
+                                            categories: category
+                                        }
+                                    },
+                                    bindto: '#chart2'
+                                });
+                    });
+</script>
 	<!-- header logo: style can be found in header.less -->
 	<header class="header">
 		<a href="index.html" class="logo"> Italy </a>
@@ -64,7 +250,7 @@
 					<!-- User Account: style can be found in dropdown.less -->
 					<li class="dropdown user user-menu"><a href="#"
 						class="dropdown-toggle" data-toggle="dropdown"> <i
-							class="fa fa-user"></i> <span>Jane Doe <i class="caret"></i></span>
+							class="fa fa-user"></i> <span>Dhaval Modi<i class="caret"></i></span>
 					</a>
 						<ul class="dropdown-menu dropdown-custom dropdown-menu-right">
 							<li class="dropdown-header text-center">Account</li>
@@ -95,7 +281,7 @@
 						<img src="img/26115.jpg" class="img-circle" alt="User Image" />
 					</div>
 					<div class="pull-left info">
-						<p>Hello, Jane</p>
+						<p>Hello, Dhaval</p>
 
 					</div>
 				</div>
@@ -186,56 +372,7 @@
 						<section class="panel">
 							<header class="panel-heading"> Earning Graph </header>
 							<div class="panel-body">
-								<div id="chart2"></div>
-								<script>
-									d3.csv("transaction_data.csv", function(
-											error, csv_data) {
-										var modData = [];
-										var category = [];
-										var item = [];
-										var data = d3.nest().key(function(d) {
-											return d.Transaction_Type;
-										}).rollup(function(d) {
-											return d3.sum(d, function(g) {
-												return 1;
-											});
-										}).entries(csv_data);
-
-										console.log(data);
-
-										data.forEach(function(d, i) {
-											console.log(d.key)
-											var item = [ d.key ];
-											item.push(d.values);
-											modData.push(item);
-										});
-
-										var chart = c3.generate({
-											data : {
-												columns : modData,
-												//mimeType: 'json'
-												type : 'donut',
-												onclick : function(d, i) {
-													console
-															.log("onclick", d,
-																	i);
-												},
-												onmouseover : function(d, i) {
-													console.log("onmouseover",
-															d, i);
-												},
-												onmouseout : function(d, i) {
-													console.log("onmouseout",
-															d, i);
-												}
-											},
-											donut : {
-												title : "Customer"
-											},
-											bindto : '#chart2'
-										});
-									});
-								</script>
+								<div id="chart"></div>
 							</div>
 						</section>
 						<!--earning graph end-->
@@ -247,191 +384,26 @@
 						<section class="panel">
 							<header class="panel-heading"> Notifications </header>
 							<div class="panel-body">
-
-								<div id="chart3"></div>
-								<script>
-									d3.csv("transaction_data.csv", function(
-											error, csv_data) {
-										var modData = [];
-										var category = [];
-										var item = [];
-										var data = d3.nest().key(function(d) {
-											return d.Transaction_Type;
-										}).rollup(function(d) {
-											return d3.sum(d, function(g) {
-												return 1;
-											});
-										}).entries(csv_data);
-
-										console.log(data);
-
-										data.forEach(function(d, i) {
-											console.log(d.key)
-											var item = [ d.key ];
-											item.push(d.values);
-											modData.push(item);
-										});
-
-										var chart = c3.generate({
-											data : {
-												columns : modData,
-												//mimeType: 'json'
-												type : 'donut',
-												onclick : function(d, i) {
-													console
-															.log("onclick", d,
-																	i);
-												},
-												onmouseover : function(d, i) {
-													console.log("onmouseover",
-															d, i);
-												},
-												onmouseout : function(d, i) {
-													console.log("onmouseout",
-															d, i);
-												}
-											},
-											donut : {
-												title : "Customer"
-											},
-											bindto : '#chart3'
-										});
-									});
-								</script>
-
-
+								<div id="chart1"></div>
 							</div>
 						</section>
-
-
-
 					</div>
-
-
 				</div>
 				<div class="row">
-
-					<div class="col-md-8">
+					<div class="col-md-6">
 						<section class="panel">
 							<header class="panel-heading"> Work Progress </header>
 							<div class="panel-body">
-								<div id="chart4"></div>
-								<script>
-									d3.csv("transaction_data.csv", function(
-											error, csv_data) {
-										var modData = [];
-										var category = [];
-										var item = [];
-										var data = d3.nest().key(function(d) {
-											return d.Transaction_Type;
-										}).rollup(function(d) {
-											return d3.sum(d, function(g) {
-												return 1;
-											});
-										}).entries(csv_data);
-
-										console.log(data);
-
-										data.forEach(function(d, i) {
-											console.log(d.key)
-											var item = [ d.key ];
-											item.push(d.values);
-											modData.push(item);
-										});
-
-										var chart = c3.generate({
-											data : {
-												columns : modData,
-												//mimeType: 'json'
-												type : 'donut',
-												onclick : function(d, i) {
-													console
-															.log("onclick", d,
-																	i);
-												},
-												onmouseover : function(d, i) {
-													console.log("onmouseover",
-															d, i);
-												},
-												onmouseout : function(d, i) {
-													console.log("onmouseout",
-															d, i);
-												}
-											},
-											donut : {
-												title : "Customer"
-											},
-											bindto : '#chart4'
-										});
-									});
-								</script>
+								<div id="chart2"></div>
 							</div>
 						</section>
-
-
 					</div>
 					<!--end col-6 -->
-					<div class="col-md-4">
+					<div class="col-md-6">
 						<section class="panel">
 							<header class="panel-heading"> Twitter Feed </header>
 							<div class="panel-body">
-								<div class="twt-area">
-									<form action="#" method="post">
-										<textarea class="form-control" name="profile-tweet"
-											placeholder="Share something on Twitter.." rows="3"></textarea>
-
-										<div class="clearfix">
-											<button class="btn btn-sm btn-primary pull-right"
-												type="submit">
-												<i class="fa fa-twitter"></i> Tweet
-											</button>
-											<a class="btn btn-link btn-icon fa fa-location-arrow"
-												data-original-title="Add Location" data-placement="bottom"
-												data-toggle="tooltip" href="#"
-												style="text-decoration: none;" title=""></a> <a
-												class="btn btn-link btn-icon fa fa-camera"
-												data-original-title="Add Photo" data-placement="bottom"
-												data-toggle="tooltip" href="#"
-												style="text-decoration: none;" title=""></a>
-										</div>
-									</form>
-								</div>
-								<ul class="media-list">
-									<li class="media"><a href="#" class="pull-left"> <img
-											src="img/26115.jpg" alt="Avatar" class="img-circle"
-											width="64" height="64">
-									</a>
-										<div class="media-body">
-											<span class="text-muted pull-right"> <small><em>30
-														min ago</em></small>
-											</span> <a href="page_ready_user_profile.php"> <strong>John
-													Doe</strong>
-											</a>
-											<p>
-												In hac <a href="#">habitasse</a> platea dictumst. Proin ac
-												nibh rutrum lectus rhoncus eleifend. <a href="#"
-													class="text-danger"> <strong>#dev</strong>
-												</a>
-											</p>
-										</div></li>
-									<li class="media"><a href="#" class="pull-left"> <img
-											src="img/26115.jpg" alt="Avatar" class="img-circle"
-											width="64" height="64">
-									</a>
-										<div class="media-body">
-											<span class="text-muted pull-right"> <small><em>30
-														min ago</em></small>
-											</span> <a href="page_ready_user_profile.php"> <strong>John
-													Doe</strong>
-											</a>
-											<p>
-												In hac <a href="#">habitasse</a> platea dictumst. Proin ac
-												nibh rutrum lectus rhoncus eleifend. <a href="#"
-													class="text-danger"> <strong>#design</strong>
-												</a>
-											</p>
-										</div></li>
-								</ul>
+								<div id="chart2"></div>
 							</div>
 						</section>
 					</div>
