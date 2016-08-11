@@ -232,11 +232,61 @@
                                     },
                                     bindto: '#chart2'
                                 });
+								
+							
+							
+							/////WIP::::WORK IN PROGRESS: WATERFALL
+							modData = [];
+							category = [];
+							item = [];
+							var WaterfallData = d3.nest()
+								.key(function (d) {
+								return d.Transaction_Detail;
+							})
+							.rollup(function (d) {
+								return d3.sum(d, function (g) {
+									return 1;
+							});
+							}).entries(csv_data);
+
+						console.log("Waterfall");
+						console.log(WaterfallData);
+
+						// Transform data (i.e., finding cumulative values and total)
+						  var cumulative = 0;
+						  for (var i = 0; i < WaterfallData.length; i++) {
+							WaterfallData[i].start = cumulative;
+							cumulative += WaterfallData[i].values;
+							WaterfallData[i].end = cumulative;
+							//WIP::::PENDING----LOGIC FOR +ve / -ve
+							WaterfallData[i].class = ( WaterfallData[i].values >= 0 ) ? 'positive' : 'negative'
+							}
+							WaterfallData.push({
+								name: 'Total',
+								end: cumulative,
+								start: 0,
+								class: 'total'
+							});
+							console.log("Waterfall2");
+							console.log(WaterfallData);
+							//WIP::::PENDING----LOGIC FOR +ve / -ve
+							var waterfallChart = c3.generate({
+								data: {
+									columns: [WaterfallData],
+									type: 'bar',
+								},
+								grid: {
+									y: {
+										lines: [{value:0}]
+									}
+								}, 
+								bindto: '#chart4'
+							  });
                     });
 </script>
 	<!-- header logo: style can be found in header.less -->
 	<header class="header">
-		<a href="index.html" class="logo"> Italy </a>
+		<a href="index.html" class="logo"> Italy Customer Walk</a>
 		<!-- Header Navbar: style can be found in header.less -->
 		<nav class="navbar navbar-static-top" role="navigation">
 			<!-- Sidebar toggle button-->
@@ -367,10 +417,10 @@
 				<!-- Main row -->
 				<div class="row">
 
-					<div class="col-lg-4">
+					<div class="col-md-6">
 						<!--earning graph start-->
 						<section class="panel">
-							<header class="panel-heading"> Earning Graph </header>
+							<header class="panel-heading"> What are the customer movements in this time period? </header>
 							<div class="panel-body">
 								<div id="chart"></div>
 							</div>
@@ -378,13 +428,13 @@
 						<!--earning graph end-->
 
 					</div>
-					<div class="col-md-8">
+					<div class="col-md-6">
 
 						<!--chat start-->
 						<section class="panel">
-							<header class="panel-heading"> Notifications </header>
+							<header class="panel-heading"> What are the detailed customer movements in this time period? </header>
 							<div class="panel-body">
-								<div id="chart1"></div>
+								<div id="chart4"></div>
 							</div>
 						</section>
 					</div>
@@ -392,16 +442,16 @@
 				<div class="row">
 					<div class="col-md-6">
 						<section class="panel">
-							<header class="panel-heading"> Work Progress </header>
+							<header class="panel-heading"> How are customer movements trending over time? </header>
 							<div class="panel-body">
-								<div id="chart2"></div>
+								<div id="chart1"></div>
 							</div>
 						</section>
 					</div>
 					<!--end col-6 -->
 					<div class="col-md-6">
 						<section class="panel">
-							<header class="panel-heading"> Twitter Feed </header>
+							<header class="panel-heading"> How is customer acquisition trending over time? </header>
 							<div class="panel-body">
 								<div id="chart2"></div>
 							</div>
@@ -409,215 +459,9 @@
 					</div>
 
 				</div>
-				<div class="row">
-					<div class="col-md-5">
-						<div class="panel">
-							<header class="panel-heading"> Teammates </header>
-
-							<ul class="list-group teammates">
-								<li class="list-group-item"><a href=""><img
-										src="img/26115.jpg" width="50" height="50"></a> <span
-									class="pull-right label label-danger inline m-t-15">Admin</span>
-									<a href="">Damon Parker</a></li>
-								<li class="list-group-item"><a href=""><img
-										src="img/26115.jpg" width="50" height="50"></a> <span
-									class="pull-right label label-info inline m-t-15">Member</span>
-									<a href="">Joe Waston</a></li>
-								<li class="list-group-item"><a href=""><img
-										src="img/26115.jpg" width="50" height="50"></a> <span
-									class="pull-right label label-warning inline m-t-15">Editor</span>
-									<a href="">Jannie Dvis</a></li>
-								<li class="list-group-item"><a href=""><img
-										src="img/26115.jpg" width="50" height="50"></a> <span
-									class="pull-right label label-warning inline m-t-15">Editor</span>
-									<a href="">Emma Welson</a></li>
-								<li class="list-group-item"><a href=""><img
-										src="img/26115.jpg" width="50" height="50"></a> <span
-									class="pull-right label label-success inline m-t-15">Subscriber</span>
-									<a href="">Emma Welson</a></li>
-							</ul>
-							<div class="panel-footer bg-white">
-								<!-- <span class="pull-right badge badge-info">32</span> -->
-								<button class="btn btn-primary btn-addon btn-sm">
-									<i class="fa fa-plus"></i> Add Teammate
-								</button>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-7">
-						<section class="panel tasks-widget">
-							<header class="panel-heading"> Todo list </header>
-							<div class="panel-body">
-
-								<div class="task-content">
-
-									<ul class="task-list">
-										<li>
-											<div class="task-checkbox">
-												<!-- <input type="checkbox" class="list-child" value=""  /> -->
-												<input type="checkbox" class="flat-grey list-child" />
-												<!-- <input type="checkbox" class="square-grey"/> -->
-											</div>
-											<div class="task-title">
-												<span class="task-title-sp">Director is Modern
-													Dashboard</span> <span class="label label-success">2 Days</span>
-												<div class="pull-right hidden-phone">
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-check"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-pencil"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-times"></i>
-													</button>
-												</div>
-											</div>
-										</li>
-										<li>
-											<div class="task-checkbox">
-												<!-- <input type="checkbox" class="list-child" value=""  /> -->
-												<input type="checkbox" class="flat-grey" />
-											</div>
-											<div class="task-title">
-												<span class="task-title-sp">Fully Responsive &
-													Bootstrap 3.0.2 Compatible</span> <span class="label label-danger">Done</span>
-												<div class="pull-right hidden-phone">
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-check"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-pencil"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-times"></i>
-													</button>
-												</div>
-											</div>
-										</li>
-										<li>
-											<div class="task-checkbox">
-												<!-- <input type="checkbox" class="list-child" value=""  /> -->
-												<input type="checkbox" class="flat-grey" />
-											</div>
-											<div class="task-title">
-												<span class="task-title-sp">Latest Design Concept</span> <span
-													class="label label-warning">Company</span>
-												<div class="pull-right hidden-phone">
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-check"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-pencil"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-times"></i>
-													</button>
-												</div>
-											</div>
-										</li>
-										<li>
-											<div class="task-checkbox">
-												<!-- <input type="checkbox" class="list-child" value=""  /> -->
-												<input type="checkbox" class="flat-grey" />
-											</div>
-											<div class="task-title">
-												<span class="task-title-sp">Write well documentation
-													for this theme</span> <span class="label label-primary">3
-													Days</span>
-												<div class="pull-right hidden-phone">
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-check"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-pencil"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-times"></i>
-													</button>
-												</div>
-											</div>
-										</li>
-										<li>
-											<div class="task-checkbox">
-												<!-- <input type="checkbox" class="list-child" value=""  /> -->
-												<input type="checkbox" class="flat-grey" />
-											</div>
-											<div class="task-title">
-												<span class="task-title-sp">Don't bother to download
-													this Dashbord</span> <span class="label label-inverse">Now</span>
-												<div class="pull-right">
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-check"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-pencil"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-times"></i>
-													</button>
-												</div>
-											</div>
-										</li>
-										<li>
-											<div class="task-checkbox">
-												<!-- <input type="checkbox" class="list-child" value=""  /> -->
-												<input type="checkbox" class="flat-grey" />
-											</div>
-											<div class="task-title">
-												<span class="task-title-sp">Give feedback for the
-													template</span> <span class="label label-success">2 Days</span>
-												<div class="pull-right hidden-phone">
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-check"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-pencil"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-times"></i>
-													</button>
-												</div>
-											</div>
-										</li>
-										<li>
-											<div class="task-checkbox">
-												<!-- <input type="checkbox" class="list-child" value=""  /> -->
-												<input type="checkbox" class="flat-grey" />
-											</div>
-											<div class="task-title">
-												<span class="task-title-sp">Tell your friends about
-													this admin template</span> <span class="label label-danger">Now</span>
-												<div class="pull-right hidden-phone">
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-check"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-pencil"></i>
-													</button>
-													<button class="btn btn-default btn-xs">
-														<i class="fa fa-times"></i>
-													</button>
-												</div>
-											</div>
-										</li>
-
-									</ul>
-								</div>
-
-								<div class=" add-task-row">
-									<a class="btn btn-success btn-sm pull-left" href="#">Add
-										New Tasks</a> <a class="btn btn-default btn-sm pull-right"
-										href="#">See All Tasks</a>
-								</div>
-							</div>
-						</section>
-					</div>
-				</div>
-				<!-- row end -->
 			</section>
 			<!-- /.content -->
-			<div class="footer-main">Copyright &copy Director, 2014</div>
+			<div class="footer-main">Copyright &copy Zurich EDAA, 2016</div>
 		</aside>
 		<!-- /.right-side -->
 
