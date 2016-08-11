@@ -263,17 +263,34 @@
 							}
 							WaterfallData.push({
 								name: 'Total',
+								key: 'Total',
 								end: cumulative,
+								values: cumulative,
 								start: 0,
 								class: 'total'
 							});
-							console.log("Waterfall2");
-							console.log(WaterfallData);
-							//WIP::::PENDING----LOGIC FOR +ve / -ve
+							
+							var startValueArray = ['data1'];
+							var endValueArray = ['data2'];
+							WaterfallData.forEach(function(k) {
+								startValueArray.push(k.start);
+								endValueArray.push(k.values);
+							});
+							console.log("Start waterfall");
+							console.log(startValueArray);
+							console.log(endValueArray);
+
 							var waterfallChart = c3.generate({
 								data: {
-									columns: [WaterfallData],
+									columns: [startValueArray, endValueArray],
 									type: 'bar',
+									colors: {
+										data1: '#ffffff'
+									},
+									groups: [
+										['data2', 'data1']
+									],
+									order: null
 								},
 								grid: {
 									y: {
