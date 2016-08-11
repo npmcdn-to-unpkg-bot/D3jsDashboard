@@ -3769,8 +3769,26 @@ ul.online-users {
 }
 .sm-st-info span {
   display:block;
-  font-size:24px;
-  font-weight:600;
+  font-size:16px;
+  font-weight:500;
+  font-weight: bold;
+}
+
+.bigText {
+  font-size:20px;
+  font-weight:200;
+  color: DarkBlue;
+  float: left;
+}
+.smallText {
+  font-size:10px;
+  font-weight:200;
+  float: right;
+}
+.smallerText {
+  font-size:10px;
+  font-weight:200;
+  float: right;
 }
 .orange {
   background:#fa8564 !important;
