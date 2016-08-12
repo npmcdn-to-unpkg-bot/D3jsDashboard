@@ -16,7 +16,7 @@
 <!-- Theme style -->
 <link href="css/style.css" rel="stylesheet" type="text/css" />
 
-<title>JSP Page</title>
+<title>Zurich Dashboard - Login Page</title>
 </head>
 <body>
 	<div class="col-lg-6">
@@ -30,7 +30,7 @@
 					<label for="inputEmail1" class="col-lg-2 col-sm-2 control-label">Username</label>
 					<div class="col-lg-10">
 						<input type="text" class="form-control" id="inputEmail1"
-							placeholder="username" name="username">
+							placeholder="Username" name="username">
 					</div>
 				</div>
 				<div class="form-group">
@@ -39,6 +39,16 @@
 						<input type="password" class="form-control" id="inputPassword1"
 							placeholder="Password" name="password">
 					</div>
+				</div>
+				<div class="form-group">
+				<label for="inputBU" class="col-lg-2 col-sm-2 control-label">Business </label>
+				<div class="col-lg-10">
+				<select id = "prodFamilyDropDown" class="form-control">
+								<option disabled selected>Select BU</option>
+								<option>Germany</option>
+								<option>Italy</option>
+						</select>
+						</div>
 				</div>
 				<div class="form-group">
 					<div class="col-lg-offset-2 col-lg-10">

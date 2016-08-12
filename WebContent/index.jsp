@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Dashboard</title>
+<title>Zurich Dashboard - Italy Customer Walk</title>
 <meta
 	content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
 	name='viewport'>
@@ -47,371 +47,335 @@
 <body class="skin-black">
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	<script src="c3/c3.min.js"></script>
-	<script>
-		d3
-				.csv(
-						"customer_walk_flat_file.csv",
-						function(error, csv_data) {
-							var parseDate = d3.time.format("%m/%d/%Y").parse;
-							csv_data
-									.forEach(function(d) {
-										d.Transaction_Date = parseDate(d.Transaction_Date);
-									});
-							var modData = [];
-							var category = [];
-							var item = [];
-							var donutData = d3.nest().key(function(d) {
-								return d.Transaction_Type;
-							}).rollup(function(d) {
-								return d3.sum(d, function(g) {
-									return 1;
-								});
-							}).entries(csv_data);
 
-							//     console.log(donutData);
+	<script type="text/javascript">
+		d3.csv("customer_walk_flat_file.csv", function(error, csv_data) {
+			var parseDate = d3.time.format("%m/%d/%Y").parse;
+			filtered_data = csv_data;
 
-							donutData.filter(function(d) {
-								return (d.key == "New" || d.key == "Lost")
-							}).forEach(function(d, i) {
-								//   console.log(d.key)
-								var item = [ d.key ];
-								item.push(d.values);
-								modData.push(item);
-							});
+			filtered_data
+					.forEach(function(d) {
+						d.Transaction_Date = parseDate(d.Transaction_Date);
+					});
+			
+			createDonutChart(filtered_data);
 
-							var donutChart = c3.generate({
-								data : {
-									columns : modData,
-									//mimeType: 'json'
-									type : 'donut',
-									onclick : function(d, i) {
-										//    console.log("onclick", d, i);
-									},
-									onmouseover : function(d, i) {
-										//  console.log("onmouseover", d, i);
-									},
-									onmouseout : function(d, i) {
-										//  console.log("onmouseout", d, i);
-									}
-								},
-								donut : {
-									title : "Customer"
-								},
-								bindto : "#chart"
-							});
+			var modData = [];
+			var category = [];
+			var item = [];
+			//var data = filtered_data.filter(function(d) { return (d.Transaction_Type == "New" || d.Transaction_Type == "Lost");});
+			//console.log(filtered_data);
+			var categoryLineData = d3.nest()
 
-							modData = [];
-							category = [];
-							item = [];
-							//var data = csv_data.filter(function(d) { return (d.Transaction_Type == "New" || d.Transaction_Type == "Lost");});
-							//console.log(csv_data);
-							var categoryLineData = d3.nest()
+			.key(
+					function(d) {
 
-							.key(
-									function(d) {
+						var monthYear = d3.time.format("%b-%Y")
+								(new Date(d.Transaction_Date));
+						//  console.log(monthYear);
+						return monthYear;
+					}).rollup(function(d) {
 
-										var monthYear = d3.time.format("%b-%Y")
-												(new Date(d.Transaction_Date));
-										//  console.log(monthYear);
-										return monthYear;
-									}).rollup(function(d) {
+				var subData = d3.nest().key(function(d) {
+					return d.Transaction_Type;
+				}).rollup(function(d) {
+					return d
+				}).entries(d);
+				return subData;
+			}).entries(filtered_data);
+			console.log(categoryLineData);
+			var customerCountKPI = totalPolicy = totalPaymentCost = 0;
+			var newItem = [ "New" ];
+			var lostItem = [ "Lost" ];
+			category = [];
+			item = [ "Total Customer Count" ];
+			var totalModData = [];
+			var lastMonthChangeCC = 0;
+			var firstMonthChangeCC = 0;
+			var lastMonthChangePD = 0;
+			var firstMonthChangePD = 0;
+			var lastMonthChangeGWP = 0;
+			var firstMonthChangeGWP = 0;
+			var lastMonthChangeRES = 0;
+			var firstMonthChangeRES = 0;
 
-								var subData = d3.nest().key(function(d) {
-									return d.Transaction_Type;
-								}).rollup(function(d) {
-									return d
-								}).entries(d);
-								return subData;
-							}).entries(csv_data);
-							console.log(categoryLineData);
-							var customerCountKPI = totalPolicy = totalPaymentCost = 0;
-							var newItem = [ "New" ];
-							var lostItem = [ "Lost" ];
-							category = [];
-							item = [ "Total Customer Count" ];
-							var totalModData = [];
-							var lastMonthChangeCC = 0;
-							var firstMonthChangeCC = 0;
-							var lastMonthChangePD = 0;
-							var firstMonthChangePD = 0;
-							var lastMonthChangeGWP = 0;
-							var firstMonthChangeGWP = 0;
-							var lastMonthChangeRES = 0;
-							var firstMonthChangeRES = 0;
+			var prevMonthCC = 1;
+			var firstMonthCC = 0;
+			var currMonthCC = 0;
+			var prevMonthPD = 1;
+			var firstMonthPD = 0;
+			var currMonthPD = 0;
+			var prevMonthGWP = 1;
+			var firstMonthGWP = 0;
+			var currMonthGWP = 0;
+			var prevMonthRES = 1;
+			var firstMonthRES = 0;
+			var currMonthRES = 0;
+			categoryLineData
+					.filter(function(f) {
+						return f.key != "Jan-1970"
+					})
+					.forEach(
+							function(d, i) {
 
-							var prevMonthCC = 1;
-							var firstMonthCC = 0;
-							var currMonthCC = 0;
-							var prevMonthPD = 1;
-							var firstMonthPD = 0;
-							var currMonthPD = 0;
-							var prevMonthGWP = 1;
-							var firstMonthGWP = 0;
-							var currMonthGWP = 0;
-							var prevMonthRES = 1;
-							var firstMonthRES = 0;
-							var currMonthRES = 0;
-							categoryLineData
-									.filter(function(f) {
-										return f.key != "Jan-1970"
-									})
-									.forEach(
-											function(d, i) {
+								currMonthCC = 0;
 
-												currMonthCC = 0;
+								console.log(d.key);
+								category.push(d.key);
 
-												console.log(d.key);
-												category.push(d.key);
+								d.values
+										.forEach(function(k, l) {
 
-												d.values
-														.forEach(function(k, l) {
-
-															var custCount = d3
-																	.map(
-																			k.values,
-																			function(
-																					d) {
-																				return d.Customer_ID;
-																			})
-																	.keys().length;
-															var policyCount = k.values.length;
-															var paymentSum = d3
-																	.sum(
-																			k.values,
-																			function(
-																					d) {
-																				return d.Payment_Cost;
-																			});
-															if (k.key == "Lost") {
-																console
-																		.log(custCount);
-																lostItem
-																		.push(custCount);
-																customerCountKPI = customerCountKPI
-																		- custCount;
-																totalPolicy = totalPolicy
-																		- policyCount;
-																totalPaymentCost = totalPaymentCost
-																		- paymentSum;
-															} else if (k.key == "New") {
-																newItem
-																		.push(custCount);
-																customerCountKPI = customerCountKPI
-																		+ custCount;
-																totalPolicy = totalPolicy
-																		+ policyCount;
-																totalPaymentCost = totalPaymentCost
-																		+ paymentSum;
-															} else {
-																customerCountKPI = customerCountKPI
-																		+ custCount;
-																totalPolicy = totalPolicy
-																		+ policyCount;
-																totalPaymentCost = totalPaymentCost
-																		+ paymentSum;
-															}
-														});
-												//customerCountKPI = customerCountKPI + currMonthCC;
-												lastMonthChangeCC = ((customerCountKPI - prevMonthCC) / prevMonthCC) * 100;
-												lastMonthChangePD = ((totalPolicy - prevMonthPD) / prevMonthPD) * 100;
-												lastMonthChangeGWP = ((totalPaymentCost - prevMonthGWP) / prevMonthGWP) * 100;
-												item.push(customerCountKPI);
-												//        console.log(currMonthCC);
-												//      console.log(prevMonthCC);
-												if (prevMonthCC == 1) {
-													firstMonthCC = customerCountKPI;
-													firstMonthPD = totalPolicy;
-													firstMonthGWP = totalPaymentCost;
-												}
-												prevMonthCC = customerCountKPI;
-												prevMonthPD = totalPolicy;
-												prevMonthGWP = totalPaymentCost;
-
-											});
-							policyDensityKPI = (totalPolicy / customerCountKPI);
-							firstMonthChangeCC = ((customerCountKPI - firstMonthCC) / firstMonthCC) * 100;
-							firstMonthChangePD = ((totalPolicy - firstMonthPD) / firstMonthPD) * 100;
-							firstMonthChangeGWP = ((totalPaymentCost - firstMonthGWP) / firstMonthGWP) * 100;
-
-							var reserveKPI = totalPaymentCost * 0.75;
-							var amtFormat = d3.format(",.0f");
-							var txtFormat = d3.format(",.2f");
-							//// ######### Customer Count KPI ################# ////
-							d3.select("#txtCustomerCountKPI").text(
-									customerCountKPI);
-
-							d3.select("#lastMonthCCKPI").style("color",
-									txtColorFunc(lastMonthChangeCC)).style(
-									"font-weight", "bold").text(
-									txtFormat(lastMonthChangeCC).concat("%"));
-							d3.select("#firstMonthCCKPI").style("color",
-									txtColorFunc(firstMonthChangeCC)).style(
-									"font-weight", "bold").text(
-									txtFormat(firstMonthChangeCC).concat("%"));
-							d3.select("#eoyCCKPI").style("color",
-									txtColorFunc(firstMonthChangeCC)).style(
-									"font-weight", "bold").text(
-									txtFormat(firstMonthChangeCC).concat("%"));
-
-							//// ######### Product Density KPI ################# ////
-							d3.select("#txtProductDensityKPI").text(
-									txtFormat(policyDensityKPI));
-
-							d3.select("#lastMonthPDKPI").style("color",
-									txtColorFunc(lastMonthChangePD)).style(
-									"font-weight", "bold").text(
-									txtFormat(lastMonthChangePD).concat("%"));
-							d3.select("#firstMonthPDKPI").style("color",
-									txtColorFunc(firstMonthChangePD)).style(
-									"font-weight", "bold").text(
-									txtFormat(firstMonthChangePD).concat("%"));
-							d3.select("#eoyPDKPI").style("color",
-									txtColorFunc(firstMonthChangePD)).style(
-									"font-weight", "bold").text(
-									txtFormat(firstMonthChangePD).concat("%"));
-
-							//// ######### Gross Written Premium KPI ################# ////
-							d3.select("#txtGrossWrittenPremiumKPI").style(
-									"font-size", "15px").text(
-									"€ ".concat(amtFormat(totalPaymentCost)));
-
-							d3.select("#lastMonthGWPKPI").style("color",
-									txtColorFunc(lastMonthChangeGWP)).style(
-									"font-weight", "bold").text(
-									txtFormat(lastMonthChangeGWP).concat("%"));
-							d3.select("#firstMonthGWPKPI").style("color",
-									txtColorFunc(firstMonthChangeGWP)).style(
-									"font-weight", "bold").text(
-									txtFormat(firstMonthChangeGWP).concat("%"));
-							d3.select("#eoyGWPKPI").style("color",
-									txtColorFunc(firstMonthChangeGWP)).style(
-									"font-weight", "bold").text(
-									txtFormat(firstMonthChangeGWP).concat("%"));
-
-							//// ######### Reserve KPI ################# ////
-							d3
-									.select("#txtReserveKPI")
-									.style("font-size", "15px")
-									.text(
-											"€ "
-													.concat(amtFormat(totalPaymentCost * 0.75)));
-							var amtFormat = d3.format(",.0f");
-							d3.select("#lastMonthRESKPI").style("color",
-									txtColorFunc(lastMonthChangeGWP)).style(
-									"font-weight", "bold").text(
-									txtFormat(lastMonthChangeGWP).concat("%"));
-							d3.select("#firstMonthRESKPI").style("color",
-									txtColorFunc(firstMonthChangeGWP)).style(
-									"font-weight", "bold").text(
-									txtFormat(firstMonthChangeGWP).concat("%"));
-							d3.select("#eoyRESKPI").style("color",
-									txtColorFunc(firstMonthChangeGWP)).style(
-									"font-weight", "bold").text(
-									txtFormat(firstMonthChangeGWP).concat("%"));
-
-							//   console.log(item);
-							totalModData.push(item);
-							modData.push(newItem);
-							modData.push(lostItem);
-							//     console.log(customerCountKPI);
-							//   console.log(totalModData);
-							//							console.log(modData);
-							var categoryLineChart = c3.generate({
-								data : {
-									columns : modData
-
-								},
-								axis : {
-									x : {
-										type : 'category',
-										categories : category
-									}
-								},
-								bindto : '#chart2'
-							});
-
-							//    console.log(category);
-							//console.log(modData);
-							var totalLineChart = c3.generate({
-								data : {
-									columns : totalModData
-
-								},
-								axis : {
-									x : {
-										type : 'category',
-										categories : category
-									}
-								},
-								bindto : '#chart1'
-							});
-
-							/////WIP::::WORK IN PROGRESS: WATERFALL
-							modData = [];
-							category = [];
-							item = [];
-							var WaterfallData = d3.nest().key(function(d) {
-								return d.Transaction_Detail;
-							}).rollup(function(d) {
-								return d3.sum(d, function(g) {
-									return 1;
-								});
-							}).entries(csv_data);
-
-							console.log("Waterfall");
-							console.log(WaterfallData);
-
-							// Transform data (i.e., finding cumulative values and total)
-							var cumulative = 0;
-							for (var i = 0; i < WaterfallData.length; i++) {
-								WaterfallData[i].start = cumulative;
-								cumulative += WaterfallData[i].values;
-								WaterfallData[i].end = cumulative;
-								//WIP::::PENDING----LOGIC FOR +ve / -ve
-								WaterfallData[i].class = (WaterfallData[i].values >= 0) ? 'positive'
-										: 'negative'
-							}
-							WaterfallData.push({
-								name : 'Total',
-								key : 'Total',
-								end : cumulative,
-								values : cumulative,
-								start : 0,
-								class : 'total'
-							});
-
-							var startValueArray = [ 'data1' ];
-							var endValueArray = [ 'data2' ];
-							WaterfallData.forEach(function(k) {
-								startValueArray.push(k.start);
-								endValueArray.push(k.values);
-							});
-							console.log("Start waterfall");
-							console.log(startValueArray);
-							console.log(endValueArray);
-
-							var waterfallChart = c3
-									.generate({
-										data : {
-											columns : [ startValueArray,
-													endValueArray ],
-											type : 'bar',
-											colors : {
-												data1 : '#ffffff'
-											},
-											groups : [ [ 'data2', 'data1' ] ],
-											order : null
-										},
-										grid : {
-											y : {
-												lines : [ {
-													value : 0
-												} ]
+											var custCount = d3
+													.map(
+															k.values,
+															function(
+																	d) {
+																return d.Customer_ID;
+															})
+													.keys().length;
+											var policyCount = k.values.length;
+											var paymentSum = d3
+													.sum(
+															k.values,
+															function(
+																	d) {
+																return d.Payment_Cost;
+															});
+											if (k.key == "Lost") {
+												console
+														.log(custCount);
+												lostItem
+														.push(custCount);
+												customerCountKPI = customerCountKPI
+														- custCount;
+												totalPolicy = totalPolicy
+														- policyCount;
+												totalPaymentCost = totalPaymentCost
+														- paymentSum;
+											} else if (k.key == "New") {
+												newItem
+														.push(custCount);
+												customerCountKPI = customerCountKPI
+														+ custCount;
+												totalPolicy = totalPolicy
+														+ policyCount;
+												totalPaymentCost = totalPaymentCost
+														+ paymentSum;
+											} else {
+												customerCountKPI = customerCountKPI
+														+ custCount;
+												totalPolicy = totalPolicy
+														+ policyCount;
+												totalPaymentCost = totalPaymentCost
+														+ paymentSum;
 											}
-										},
-										bindto : '#chart4'
-									});
-						});
+										});
+								//customerCountKPI = customerCountKPI + currMonthCC;
+								lastMonthChangeCC = ((customerCountKPI - prevMonthCC) / prevMonthCC) * 100;
+								lastMonthChangePD = ((totalPolicy - prevMonthPD) / prevMonthPD) * 100;
+								lastMonthChangeGWP = ((totalPaymentCost - prevMonthGWP) / prevMonthGWP) * 100;
+								item.push(customerCountKPI);
+								//        console.log(currMonthCC);
+								//      console.log(prevMonthCC);
+								if (prevMonthCC == 1) {
+									firstMonthCC = customerCountKPI;
+									firstMonthPD = totalPolicy;
+									firstMonthGWP = totalPaymentCost;
+								}
+								prevMonthCC = customerCountKPI;
+								prevMonthPD = totalPolicy;
+								prevMonthGWP = totalPaymentCost;
+
+							});
+			policyDensityKPI = (totalPolicy / customerCountKPI);
+			firstMonthChangeCC = ((customerCountKPI - firstMonthCC) / firstMonthCC) * 100;
+			firstMonthChangePD = ((totalPolicy - firstMonthPD) / firstMonthPD) * 100;
+			firstMonthChangeGWP = ((totalPaymentCost - firstMonthGWP) / firstMonthGWP) * 100;
+
+			var reserveKPI = totalPaymentCost * 0.75;
+			var amtFormat = d3.format(",.0f");
+			var txtFormat = d3.format(",.2f");
+			//// ######### Customer Count KPI ################# ////
+			d3.select("#txtCustomerCountKPI").text(
+					customerCountKPI);
+
+			d3.select("#lastMonthCCKPI").style("color",
+					txtColorFunc(lastMonthChangeCC)).style(
+					"font-weight", "bold").text(
+					txtFormat(lastMonthChangeCC).concat("%"));
+			d3.select("#firstMonthCCKPI").style("color",
+					txtColorFunc(firstMonthChangeCC)).style(
+					"font-weight", "bold").text(
+					txtFormat(firstMonthChangeCC).concat("%"));
+			d3.select("#eoyCCKPI").style("color",
+					txtColorFunc(firstMonthChangeCC)).style(
+					"font-weight", "bold").text(
+					txtFormat(firstMonthChangeCC).concat("%"));
+
+			//// ######### Product Density KPI ################# ////
+			d3.select("#txtProductDensityKPI").text(
+					txtFormat(policyDensityKPI));
+
+			d3.select("#lastMonthPDKPI").style("color",
+					txtColorFunc(lastMonthChangePD)).style(
+					"font-weight", "bold").text(
+					txtFormat(lastMonthChangePD).concat("%"));
+			d3.select("#firstMonthPDKPI").style("color",
+					txtColorFunc(firstMonthChangePD)).style(
+					"font-weight", "bold").text(
+					txtFormat(firstMonthChangePD).concat("%"));
+			d3.select("#eoyPDKPI").style("color",
+					txtColorFunc(firstMonthChangePD)).style(
+					"font-weight", "bold").text(
+					txtFormat(firstMonthChangePD).concat("%"));
+
+			//// ######### Gross Written Premium KPI ################# ////
+			d3.select("#txtGrossWrittenPremiumKPI").style(
+					"font-size", "15px").text(
+					"€ ".concat(amtFormat(totalPaymentCost)));
+
+			d3.select("#lastMonthGWPKPI").style("color",
+					txtColorFunc(lastMonthChangeGWP)).style(
+					"font-weight", "bold").text(
+					txtFormat(lastMonthChangeGWP).concat("%"));
+			d3.select("#firstMonthGWPKPI").style("color",
+					txtColorFunc(firstMonthChangeGWP)).style(
+					"font-weight", "bold").text(
+					txtFormat(firstMonthChangeGWP).concat("%"));
+			d3.select("#eoyGWPKPI").style("color",
+					txtColorFunc(firstMonthChangeGWP)).style(
+					"font-weight", "bold").text(
+					txtFormat(firstMonthChangeGWP).concat("%"));
+
+			//// ######### Reserve KPI ################# ////
+			d3
+					.select("#txtReserveKPI")
+					.style("font-size", "15px")
+					.text(
+							"€ "
+									.concat(amtFormat(totalPaymentCost * 0.75)));
+			var amtFormat = d3.format(",.0f");
+			d3.select("#lastMonthRESKPI").style("color",
+					txtColorFunc(lastMonthChangeGWP)).style(
+					"font-weight", "bold").text(
+					txtFormat(lastMonthChangeGWP).concat("%"));
+			d3.select("#firstMonthRESKPI").style("color",
+					txtColorFunc(firstMonthChangeGWP)).style(
+					"font-weight", "bold").text(
+					txtFormat(firstMonthChangeGWP).concat("%"));
+			d3.select("#eoyRESKPI").style("color",
+					txtColorFunc(firstMonthChangeGWP)).style(
+					"font-weight", "bold").text(
+					txtFormat(firstMonthChangeGWP).concat("%"));
+
+			//   console.log(item);
+			totalModData.push(item);
+			modData.push(newItem);
+			modData.push(lostItem);
+			//     console.log(customerCountKPI);
+			//   console.log(totalModData);
+			//							console.log(modData);
+			
+			populateMonthFilterList(category);
+			populateChannelTypeFilterList();
+			
+			var categoryLineChart = c3.generate({
+				data : {
+					columns : modData
+
+				},
+				axis : {
+					x : {
+						type : 'category',
+						categories : category
+					}
+				},
+				bindto : '#chart2'
+			});
+
+			//    console.log(category);
+			//console.log(modData);
+			var totalLineChart = c3.generate({
+				data : {
+					columns : totalModData
+
+				},
+				axis : {
+					x : {
+						type : 'category',
+						categories : category
+					}
+				},
+				bindto : '#chart1'
+			});
+
+			/////WIP::::WORK IN PROGRESS: WATERFALL
+			modData = [];
+			category = [];
+			item = [];
+			var WaterfallData = d3.nest().key(function(d) {
+				return d.Transaction_Detail;
+			}).rollup(function(d) {
+				return d3.sum(d, function(g) {
+					return 1;
+				});
+			}).entries(filtered_data);
+
+			console.log("Waterfall");
+			console.log(WaterfallData);
+
+			// Transform data (i.e., finding cumulative values and total)
+			var cumulative = 0;
+			for (var i = 0; i < WaterfallData.length; i++) {
+				WaterfallData[i].start = cumulative;
+				cumulative += WaterfallData[i].values;
+				WaterfallData[i].end = cumulative;
+				//WIP::::PENDING----LOGIC FOR +ve / -ve
+				WaterfallData[i].class = (WaterfallData[i].values >= 0) ? 'positive'
+						: 'negative'
+			}
+			WaterfallData.push({
+				name : 'Total',
+				key : 'Total',
+				end : cumulative,
+				values : cumulative,
+				start : 0,
+				class : 'total'
+			});
+
+			var startValueArray = [ 'data1' ];
+			var endValueArray = [ 'data2' ];
+			WaterfallData.forEach(function(k) {
+				startValueArray.push(k.start);
+				endValueArray.push(k.values);
+			});
+			console.log("Start waterfall");
+			console.log(startValueArray);
+			console.log(endValueArray);
+
+			var waterfallChart = c3
+					.generate({
+						data : {
+							columns : [ startValueArray,
+									endValueArray ],
+							type : 'bar',
+							colors : {
+								data1 : '#ffffff'
+							},
+							groups : [ [ 'data2', 'data1' ] ],
+							order : null
+						},
+						grid : {
+							y : {
+								lines : [ {
+									value : 0
+								} ]
+							}
+						},
+						bindto : '#chart4'
+					});
+		});
 
 		function txtColorFunc(value) {
 			var valueColor = "green";
@@ -424,10 +388,105 @@
 			}
 			return valueColor;
 		}
+		
+		function refreshCharts(){
+			var sel = document.getElementById('channelTypeDropDown');
+			var updated_filtered_data = filtered_data.filter(function(e) { return (e.Sales_Channel == sel.value);});
+			createDonutChart (updated_filtered_data);
+		}
+		
+		function createDonutChart(filtered_data){
+			//Prepare Data for Donut Chart
+			console.log("start createDonutChart", filtered_data);
+			var modData = [];
+			var item = [];
+			
+			var donutData = d3.nest().key(function(d) {
+				return d.Transaction_Type;
+			}).rollup(function(d) {
+				return d3.sum(d, function(g) {
+					return 1;
+				});
+			}).entries(filtered_data);
+
+			donutData.filter(function(d) {
+				return (d.key == "New" || d.key == "Lost")
+			}).forEach(function(d, i) {
+				var item = [ d.key ];
+				item.push(d.values);
+				modData.push(item);
+			});
+			
+			//Create Donut chart
+			var donutChart = c3.generate({
+				data : {
+					columns : modData,
+					type : 'donut',
+					onclick : function(d, i) {
+						console.log("onclick", d);
+						console.log("onclick2", d.id);
+						updated_filtered_data = filtered_data.filter(function(e) { return (e.Transaction_Type == d.id);});
+						console.log("onclick3", updated_filtered_data);
+						//WIP::::PENDING call function to update charts
+					},
+					onmouseover : function(d, i) {
+						//  console.log("onmouseover", d, i);
+					},
+					onmouseout : function(d, i) {
+						//  console.log("onmouseout", d, i);
+					}
+				},
+				donut : {
+					title : "Customer"
+				},
+				bindto : "#chart"
+			});
+		}
+		
+		function populateMonthFilterList(category){
+			var sel = document.getElementById('monthDropDown');
+			var opt = document.createElement('option');
+			opt.innerHTML = "Select Month...";
+			opt.value = '';
+			opt.selected  = true;
+			opt.disabled  = true;
+			sel.appendChild(opt);
+				
+			for(var i = 0; i < category.length; i++) {
+				opt = document.createElement('option');
+				opt.innerHTML = category[i];
+				opt.value = category[i];
+				sel.appendChild(opt);
+			}
+		}
+		
+		function populateChannelTypeFilterList(){
+			
+			var ChannelTypeOptions = d3.nest().key(function(d) {
+				return d.Sales_Channel;
+			}).entries(filtered_data);
+			
+			console.log("start populateChannelTypeFilterList", ChannelTypeOptions);
+			var sel = document.getElementById('channelTypeDropDown');
+				var opt = document.createElement('option');
+				opt.innerHTML = "Select Channel...";
+				opt.value = '';
+				opt.selected  = true;
+				opt.disabled  = true;
+				sel.appendChild(opt);
+				
+			for(var i = 0; i < ChannelTypeOptions.length; i++) {
+				var opt = document.createElement('option');
+				opt.innerHTML = ChannelTypeOptions[i].key;
+				opt.value = ChannelTypeOptions[i].key;
+				sel.appendChild(opt);
+				console.log("Channel drop down....", opt);
+			}	
+		}
 	</script>
 	<!-- header logo: style can be found in header.less -->
 	<header class="header">
-		<a href="index.html" class="logo"> Italy Customer Walk</a>
+		<a href="index.html" class="logo"> Italy </a>
 		<!-- Header Navbar: style can be found in header.less -->
 		<nav class="navbar navbar-static-top" role="navigation">
 			<!-- Sidebar toggle button-->
@@ -436,8 +495,12 @@
 				class="icon-bar"></span> <span class="icon-bar"></span> <span
 				class="icon-bar"></span>
 			</a>
+			
+			
+			
 			<div class="navbar-right">
 				<ul class="nav navbar-nav">
+				
 					<!-- User Account: style can be found in dropdown.less -->
 					<li class="dropdown user user-menu"><a href="#"
 						class="dropdown-toggle" data-toggle="dropdown"> <i
@@ -476,93 +539,69 @@
 
 					</div>
 				</div>
-				<!-- search form -->
-				<form action="#" method="get" class="sidebar-form">
-					<div class="input-group">
-						<input type="text" name="q" class="form-control"
-							placeholder="Search..." /> <span class="input-group-btn">
-							<button type='submit' name='seach' id='search-btn'
-								class="btn btn-flat">
-								<i class="fa fa-search"></i>
-							</button>
-						</span>
-					</div>
-				</form>
-				<!-- /.search form -->
+
 				<!-- sidebar menu: : style can be found in sidebar.less -->
 				<ul class="sidebar-menu">
-					<li class="active"><a href="#"> <i class="fa fa-dashboard"></i>
-							<span>Month</span></br> <select class="form-control m-b-10">
-								<option value="volvo">Volvo</option>
-								<option value="saab">Saab</option>
-								<option value="opel">Opel</option>
-								<option value="audi">Audi</option>
-						</select>
-					</a></li>
-					<li><a href="general.html"> <i class="fa fa-gavel"></i> <span>Channel
-								Type</span></br> <select class="form-control m-b-10">
-								<option value="volvo">Volvo</option>
-								<option value="saab">Saab</option>
-								<option value="opel">Opel</option>
-								<option value="audi">Audi</option>
-						</select>
-					</a></li>
+					<li><font color="white"><i class="fa fa-dashboard"></i>
+							<span>Month</span></font></br> <select id="monthDropDown"
+						class="form-control m-b-10">
+					</select></li>
+					<li><font color="white"><i class="fa fa-gear"></i> <span>Channel
+								Type</span></font></br> <select id="channelTypeDropDown"
+						class="form-control m-b-10" onchange="refreshCharts()">
+					</select></li>
 
-					<li><a href="basic_form.html"> <i class="fa fa-globe"></i>
-							<span >Channel Name</span></br> <select class="form-control m-b-10">
-								<option value="volvo">Volvo</option>
-								<option value="saab">Saab</option>
-								<option value="opel">Opel</option>
-								<option value="audi">Audi</option>
-						</select>
-					</a></li>
+					<li><font color="white"><i class="fa fa-road"></i> <span>Channel
+								Name</span></font></br> <select id="channelNameDropDown"
+						class="form-control m-b-10">
+					</select></li>
 
-					<li><a href="simple.html"> <i class="fa fa-globe"></i> <span>Region</span></br>
-							<select class="form-control m-b-10">
-								<option value="volvo">Volvo</option>
-								<option value="saab">Saab</option>
-								<option value="opel">Opel</option>
-								<option value="audi">Audi</option>
-						</select>
-					</a></li>
-					<li><a href="simple.html"> <i class="fa fa-glass"></i> <span>Product
-								Family</span></br> <select class="form-control m-b-10">
-								<option value="volvo">Volvo</option>
-								<option value="saab">Saab</option>
-								<option value="opel">Opel</option>
-								<option value="audi">Audi</option>
-						</select>
-					</a></li>
-					<li><a href="simple.html"> <i class="fa fa-glass"></i> <span>Policy
-								Name</span></br> <select class="form-control m-b-10">
-								<option value="volvo">Volvo</option>
-								<option value="saab">Saab</option>
-								<option value="opel">Opel</option>
-								<option value="audi">Audi</option>
-						</select>
-					</a></li>
-					<li><a href="simple.html"> <i class="fa fa-glass"></i> <span>Customer
-								Type</span></br> <select class="form-control m-b-10">
-								<option value="volvo">Volvo</option>
-								<option value="saab">Saab</option>
-								<option value="opel">Opel</option>
-								<option value="audi">Audi</option>
-						</select>
-					</a></li>
+					<li><font color="white"><i class="fa fa-globe"></i> <span>Region</span></font></br>
+						<select id="regionDropDown" class="form-control m-b-10">
 
+					</select></li>
+					<li><font color="white"><i class="fa fa-star"></i> <span>Product
+								Family</span></font></br> <select id="prodFamilyDropDown"
+						class="form-control m-b-10">
+
+					</select></li>
+					<li><font color="white"> <i class="fa fa-glass"></i><span>Policy
+								Name</span></font></br> <select id="policyNameDropDown" class="form-control m-b-10">
+
+					</select></li>
+					<li><font color="white"><i class="fa fa-user"></i> <span>Customer
+								Type</span></font></br> <select id="customerTypeDropDown"
+						class="form-control m-b-10">
+
+					</select></li>
+					</br>
+					<li>
+						<button onclick="refreshCharts()">Reset</button>
+					</li>
 				</ul>
 			</section>
 			<!-- /.sidebar -->
 		</aside>
+		<!-- Right side column. Contains the navbar and content of the page -->
+            <div class="right-side">
 
-		<aside class="right-side">
+                <section class="content">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!--breadcrumbs start -->
+                            <ul class="breadcrumb">
+                                <li><a href="#"><i class="fa fa-home"></i>Home</a></li>
+                                <li><a href="#">Dashboard</a></li>
+                                <li class="active">Customer Walk</li>
+                            </ul>
+                            <!--breadcrumbs end -->
+                        </div>
+                    </div>
 
 			<!-- Main content -->
 			<section class="content">
 
 				<div class="row" style="margin-bottom: 5px;">
-
-
 					<div class="col-md-3">
 						<div class="sm-st clearfix">
 							<div class="sm-st-info">
@@ -755,41 +794,6 @@
 					radioClass : 'iradio_flat-grey'
 				});
 	</script>
-	<script type="text/javascript">
-		$(function() {
-			"use strict";
-			//BAR CHART
-			var data = {
-				labels : [ "January", "February", "March", "April", "May",
-						"June", "July" ],
-				datasets : [ {
-					label : "My First dataset",
-					fillColor : "rgba(220,220,220,0.2)",
-					strokeColor : "rgba(220,220,220,1)",
-					pointColor : "rgba(220,220,220,1)",
-					pointStrokeColor : "#fff",
-					pointHighlightFill : "#fff",
-					pointHighlightStroke : "rgba(220,220,220,1)",
-					data : [ 65, 59, 80, 81, 56, 55, 40 ]
-				}, {
-					label : "My Second dataset",
-					fillColor : "rgba(151,187,205,0.2)",
-					strokeColor : "rgba(151,187,205,1)",
-					pointColor : "rgba(151,187,205,1)",
-					pointStrokeColor : "#fff",
-					pointHighlightFill : "#fff",
-					pointHighlightStroke : "rgba(151,187,205,1)",
-					data : [ 28, 48, 40, 19, 86, 27, 90 ]
-				} ]
-			};
-			new Chart(document.getElementById("linechart").getContext("2d"))
-					.Line(data, {
-						responsive : true,
-						maintainAspectRatio : false,
-					});
 
-		});
-		// Chart.defaults.global.responsive = true;
-	</script>
 </body>
 </html>

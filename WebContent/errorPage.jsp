@@ -5,6 +5,6 @@
 <title>JSP Page</title>
 </head>
 <body>
-	<h1>Some Error has occured,Please try again later...</h1>
+	<h1>Invalid Username/Password. Please login with correct credentionals</h1>
 </body>
 </html>
