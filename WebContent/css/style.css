@@ -59,6 +59,7 @@ body > .header {
 .right-side {
   background-color: #f1f2f7;
   margin-left: 220px;
+  
 }
 /*left side - contains sidebar*/
 .left-side {
@@ -111,7 +112,7 @@ body.fixed .wrapper {
 }
 /* Content */
 .content {
-  padding: 20px 15px;
+  padding: 5px 15px;
   background: #f0f3f4;
   overflow: auto;
 }
@@ -275,6 +276,8 @@ img {
 }
 .m-b-10 {
   margin-bottom: 10px;
+  margin-left: 15px;
+  margin-right: 10px;
 }
 .m-b-15 {
   margin-bottom: 15px;
@@ -3740,11 +3743,11 @@ ul.online-users {
 
 .sm-st {
   background:#fff;
-  padding:20px;
+  padding:5px;
   -webkit-border-radius:3px;
   -moz-border-radius:3px;
   border-radius:3px;
-  margin-bottom:20px;
+  margin-bottom:5px;
   -webkit-box-shadow: 0 1px 0px rgba(0,0,0,0.05);
   box-shadow: 0 1px 0px rgba(0,0,0,0.05);
 }
@@ -3771,7 +3774,7 @@ ul.online-users {
   display:block;
   font-size:16px;
   font-weight:500;
-  font-weight: bold;
+
 }
 
 .bigText {
@@ -3977,8 +3980,8 @@ border-radius: 500px;
 white-space: nowrap;
 }
 .panel .panel-heading {
-padding: 10px 15px;
-text-transform: uppercase;
+padding: 5px 10px;
+font-size: 16px;
 }
 .login_panel .panel-heading {
 padding: 10px 15px;
