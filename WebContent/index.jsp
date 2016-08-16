@@ -51,20 +51,19 @@
 	<script type="text/javascript">
 		d3.csv("customer_walk_flat_file.csv", function(error, csv_data) {
 			var parseDate = d3.time.format("%m/%d/%Y").parse;
-			filtered_data = csv_data;
-
-			filtered_data
-					.forEach(function(d) {
+			filterTransactionType = "";
+			csv_data.forEach(function(d) {
 						d.Transaction_Date = parseDate(d.Transaction_Date);
 					});
 			
-			createDonutChart(filtered_data);
+			original_dataset = csv_data;
+			filtered_data = csv_data;
+			createDonutChart();
 
 			var modData = [];
 			var category = [];
 			var item = [];
-			//var data = filtered_data.filter(function(d) { return (d.Transaction_Type == "New" || d.Transaction_Type == "Lost");});
-			//console.log(filtered_data);
+
 			var categoryLineData = d3.nest()
 
 			.key(
@@ -83,7 +82,6 @@
 				}).entries(d);
 				return subData;
 			}).entries(filtered_data);
-			console.log(categoryLineData);
 			var customerCountKPI = totalPolicy = totalPaymentCost = 0;
 			var newItem = [ "New" ];
 			var lostItem = [ "Lost" ];
@@ -120,7 +118,6 @@
 
 								currMonthCC = 0;
 
-								console.log(d.key);
 								category.push(d.key);
 
 								d.values
@@ -143,8 +140,6 @@
 																return d.Payment_Cost;
 															});
 											if (k.key == "Lost") {
-												console
-														.log(custCount);
 												lostItem
 														.push(custCount);
 												customerCountKPI = customerCountKPI
@@ -279,6 +274,11 @@
 			
 			populateMonthFilterList(category);
 			populateChannelTypeFilterList();
+			populateChannelNameFilterList();
+			populateRegionFilterList();
+			populateProdFamilyFilterList();
+			populatePolicyNameFilterList();
+			populatecustomerTypeFilterList();
 			
 			var categoryLineChart = c3.generate({
 				data : {
@@ -310,32 +310,67 @@
 				bindto : '#chart1'
 			});
 
-			/////WIP::::WORK IN PROGRESS: WATERFALL
-			modData = [];
-			category = [];
-			item = [];
-			var WaterfallData = d3.nest().key(function(d) {
-				return d.Transaction_Detail;
-			}).rollup(function(d) {
-				return d3.sum(d, function(g) {
-					return 1;
-				});
-			}).entries(filtered_data);
+			createWaterfallChart();
+			
+		});
 
-			console.log("Waterfall");
-			console.log(WaterfallData);
-
+		function txtColorFunc(value) {
+			var valueColor = "green";
+			if (value < 0) {
+				valueColor = "red";
+			} else if (value == 0) {
+				valueColor = "orange";
+			} else {
+				valueColor = "green";
+			}
+			return valueColor;
+		}
+		
+		function refreshCharts(){
+			createFilterDataTable();
+			createDonutChart ();
+		}
+		
+		function resetCharts(){
+			document.getElementById('monthDropDown').value = "";
+			document.getElementById('channelTypeDropDown').value = "";
+			document.getElementById('channelNameDropDown').value = "";
+			document.getElementById('regionDropDown').value = "";
+			document.getElementById('prodFamilyDropDown').value = "";
+			document.getElementById('policyNameDropDown').value = "";
+			document.getElementById('customerTypeDropDown').value = "";
+			
+			filtered_data = original_dataset;
+			createDonutChart();
+			createWaterfallChart();
+		}
+		
+		function createWaterfallChart(){
+			var waterfallData = d3.nest().key(function(d) {
+					return d.Transaction_Detail;
+				}).rollup(function(d) {
+					return d3.sum(d, function(g) {
+						return 1;
+					});
+				}).entries(filtered_data);
+			console.log("waterfall chart...", waterfallData);
+			var xAxisList = [];
+			for(var i = 0; i < waterfallData.length; i++) {
+					xAxisList.push(waterfallData[i].key);
+				}
+			xAxisList.push("Closing");
+			console.log("waterfall chart 2...", xAxisList);
 			// Transform data (i.e., finding cumulative values and total)
 			var cumulative = 0;
-			for (var i = 0; i < WaterfallData.length; i++) {
-				WaterfallData[i].start = cumulative;
-				cumulative += WaterfallData[i].values;
-				WaterfallData[i].end = cumulative;
+			for (var i = 0; i < waterfallData.length; i++) {
+				waterfallData[i].start = cumulative;
+				cumulative += waterfallData[i].values;
+				waterfallData[i].end = cumulative;
 				//WIP::::PENDING----LOGIC FOR +ve / -ve
-				WaterfallData[i].class = (WaterfallData[i].values >= 0) ? 'positive'
+				waterfallData[i].class = (waterfallData[i].values >= 0) ? 'positive'
 						: 'negative'
 			}
-			WaterfallData.push({
+			waterfallData.push({
 				name : 'Total',
 				key : 'Total',
 				end : cumulative,
@@ -346,13 +381,10 @@
 
 			var startValueArray = [ 'data1' ];
 			var endValueArray = [ 'data2' ];
-			WaterfallData.forEach(function(k) {
+			waterfallData.forEach(function(k) {
 				startValueArray.push(k.start);
 				endValueArray.push(k.values);
 			});
-			console.log("Start waterfall");
-			console.log(startValueArray);
-			console.log(endValueArray);
 
 			var waterfallChart = c3
 					.generate({
@@ -373,31 +405,17 @@
 								} ]
 							}
 						},
+						/*axis : {
+							x : {
+								type : 'category',
+								categories : xAxisList
+						},*/
 						bindto : '#chart4'
 					});
-		});
-
-		function txtColorFunc(value) {
-			var valueColor = "green";
-			if (value < 0) {
-				valueColor = "red";
-			} else if (value == 0) {
-				valueColor = "orange";
-			} else {
-				valueColor = "green";
-			}
-			return valueColor;
 		}
 		
-		function refreshCharts(){
-			var sel = document.getElementById('channelTypeDropDown');
-			var updated_filtered_data = filtered_data.filter(function(e) { return (e.Sales_Channel == sel.value);});
-			createDonutChart (updated_filtered_data);
-		}
-		
-		function createDonutChart(filtered_data){
+		function createDonutChart(){
 			//Prepare Data for Donut Chart
-			console.log("start createDonutChart", filtered_data);
 			var modData = [];
 			var item = [];
 			
@@ -418,19 +436,30 @@
 			});
 			
 			//Create Donut chart
+			var currentSlice;
 			var donutChart = c3.generate({
 				data : {
 					columns : modData,
 					type : 'donut',
 					onclick : function(d, i) {
-						console.log("onclick", d);
-						console.log("onclick2", d.id);
-						updated_filtered_data = filtered_data.filter(function(e) { return (e.Transaction_Type == d.id);});
-						console.log("onclick3", updated_filtered_data);
-						//WIP::::PENDING call function to update charts
+						if(filterTransactionType == d.id)	{
+							filterTransactionType = "";
+						} else {
+							filterTransactionType = d.id;
+						}
+						createFilterDataTable();
+						createWaterfallChart();
+						/*console.log("currentSlice", currentSlice);
+						if(currentSlice !== void 0) {
+							currentSlice.attr("transform","scale(1)")
+						}
+						console.log("currentSlice 2", currentSlice);
+						currentSlice = d3.select(i).attr("transform", "scale(1.1)");
+						console.log("currentSlice 3", currentSlice);*/
 					},
 					onmouseover : function(d, i) {
-						//  console.log("onmouseover", d, i);
+						//console.log("onmouseover", d, i);
+						//console.log("onmouseover 2", d3.select(i));
 					},
 					onmouseout : function(d, i) {
 						//  console.log("onmouseout", d, i);
@@ -441,17 +470,34 @@
 				},
 				bindto : "#chart"
 			});
+			
+			d3.selectAll(".c3-legend-item-modData text").text("Changed")
+		}
+
+		function createFilterDataTable() {
+			//Filter Panel Values
+			var monthValue = document.getElementById('monthDropDown').value;
+			var channelType = document.getElementById('channelTypeDropDown').value;
+			var channelName = document.getElementById('channelNameDropDown').value;
+			var regionValue = document.getElementById('regionDropDown').value;
+			var prodFamily = document.getElementById('prodFamilyDropDown').value;
+			var policyName = document.getElementById('policyNameDropDown').value;
+			var customerType = document.getElementById('customerTypeDropDown').value;
+			
+			filtered_data = original_dataset.filter(function(e) {
+				if((monthValue == "" || e.Month == monthValue) && (channelType == "" || e.Sales_Channel == channelType) 
+					&& (channelName == "" || e.Sales_Channel_Name == channelName) && (regionValue == "" || e.Sales_Channel_City == regionValue)
+					&& (prodFamily == "" || e.Product_Family == prodFamily) && (policyName == "" || e.Policy_Name == policyName)
+					&& (customerType == "" || e.Customer_Type == customerType) && (filterTransactionType == "" || e.Transaction_Type == filterTransactionType))	{
+					return e;
+				}
+			});
 		}
 		
 		function populateMonthFilterList(category){
 			var sel = document.getElementById('monthDropDown');
-			var opt = document.createElement('option');
-			opt.innerHTML = "Select Month...";
-			opt.value = '';
-			opt.selected  = true;
-			opt.disabled  = true;
-			sel.appendChild(opt);
-				
+			addBlankOptionToDropDownList(sel, "Select Month...");
+			
 			for(var i = 0; i < category.length; i++) {
 				opt = document.createElement('option');
 				opt.innerHTML = category[i];
@@ -466,22 +512,77 @@
 				return d.Sales_Channel;
 			}).entries(filtered_data);
 			
-			console.log("start populateChannelTypeFilterList", ChannelTypeOptions);
 			var sel = document.getElementById('channelTypeDropDown');
+			addBlankOptionToDropDownList(sel, "Select Channel...");						
+			addOptionsToDropDownList(sel, ChannelTypeOptions);	
+		}
+		
+		function populateChannelNameFilterList(){
+			var ChannelNameOptions = d3.nest().key(function(d) {
+				return d.Sales_Channel_Name;
+			}).entries(filtered_data);
+			
+			var sel = document.getElementById('channelNameDropDown');
+			addBlankOptionToDropDownList(sel, "Select Channel Name...");
+			addOptionsToDropDownList(sel, ChannelNameOptions);	
+		}
+		
+		function populateRegionFilterList(){
+			var regionOptions = d3.nest().key(function(d) {
+				return d.Sales_Channel_City;
+			}).entries(filtered_data);
+			
+			var sel = document.getElementById('regionDropDown');
+			addBlankOptionToDropDownList(sel, "Select Region...");
+			addOptionsToDropDownList(sel, regionOptions);
+		}
+		
+		function populateProdFamilyFilterList(){
+			var prodFamilyOptions = d3.nest().key(function(d) {
+				return d.Product_Family;
+			}).entries(filtered_data);
+			
+			var sel = document.getElementById('prodFamilyDropDown');
+			addBlankOptionToDropDownList(sel, "Select Prod Family...");
+			addOptionsToDropDownList(sel, prodFamilyOptions);
+		}
+		
+		function populatePolicyNameFilterList(){
+			var policyNameOptions = d3.nest().key(function(d) {
+				return d.Policy_Name;
+			}).entries(filtered_data);
+			
+			var sel = document.getElementById('policyNameDropDown');
+			addBlankOptionToDropDownList(sel, "Select Policy Name...");
+			addOptionsToDropDownList(sel, policyNameOptions);
+		}
+
+		function populatecustomerTypeFilterList(){
+			var customerTypeOptions = d3.nest().key(function(d) {
+				return d.Customer_Type;
+			}).entries(filtered_data);
+			
+			var sel = document.getElementById('customerTypeDropDown');
+			addBlankOptionToDropDownList(sel, "Select Customer Type...");
+			addOptionsToDropDownList(sel, customerTypeOptions);
+		}
+		
+		function addBlankOptionToDropDownList(sel, optionName){
+			var opt = document.createElement('option');
+			opt.innerHTML = optionName;
+			opt.value = "";
+			opt.selected  = true;
+			opt.disabled  = true;
+			sel.appendChild(opt);
+		}
+		
+		function addOptionsToDropDownList(sel, optionsList){
+			for(var i = 0; i < optionsList.length; i++) {
 				var opt = document.createElement('option');
-				opt.innerHTML = "Select Channel...";
-				opt.value = '';
-				opt.selected  = true;
-				opt.disabled  = true;
+				opt.innerHTML = optionsList[i].key;
+				opt.value = optionsList[i].key;
 				sel.appendChild(opt);
-				
-			for(var i = 0; i < ChannelTypeOptions.length; i++) {
-				var opt = document.createElement('option');
-				opt.innerHTML = ChannelTypeOptions[i].key;
-				opt.value = ChannelTypeOptions[i].key;
-				sel.appendChild(opt);
-				console.log("Channel drop down....", opt);
-			}	
+			}
 		}
 	</script>
 	<!-- header logo: style can be found in header.less -->
@@ -579,7 +680,7 @@
 					</select></li>
 					</br>
 					<li>
-						<button class="btn btn-info" style="margin-left: 15px" onclick="refreshCharts()">Reset</button>
+						<button class="btn btn-info" style="margin-left: 15px" onclick="resetCharts()">Reset</button>
 					</li>
 				</ul>
 			</section>
@@ -590,7 +691,6 @@
 
                 <section class="content">
                     <div class="row" style="margin-bottom: 5px;">
-                       
                             <!--breadcrumbs start -->
                             <ul class="breadcrumb">
                                 <li><a href="#"><i class="fa fa-home"></i>Home</a></li>
@@ -598,9 +698,7 @@
                                 <li class="active">Customer Walk</li>
                             </ul>
                             <!--breadcrumbs end -->
-                      
                     </div>
-
 
 				<div class="row" style="margin-bottom: 5px;">
 					<div class="col-md-3">
@@ -767,35 +865,6 @@
 
 	<!-- Director dashboard demo (This is only for demo purposes) -->
 	<script src="js/Director/dashboard.js" type="text/javascript"></script>
-
-	<!-- Director for demo purposes -->
-	<script type="text/javascript">
-		$('input').on('ifChecked', function(event) {
-			// var element = $(this).parent().find('input:checkbox:first');
-			// element.parent().parent().parent().addClass('highlight');
-			$(this).parents('li').addClass("task-done");
-			console.log('ok');
-		});
-		$('input').on('ifUnchecked', function(event) {
-			// var element = $(this).parent().find('input:checkbox:first');
-			// element.parent().parent().parent().removeClass('highlight');
-			$(this).parents('li').removeClass("task-done");
-			console.log('not');
-		});
-	</script>
-	<script>
-		$('#noti-box').slimScroll({
-			height : '400px',
-			size : '5px',
-			BorderRadius : '5px'
-		});
-
-		$('input[type="checkbox"].flat-grey, input[type="radio"].flat-grey')
-				.iCheck({
-					checkboxClass : 'icheckbox_flat-grey',
-					radioClass : 'iradio_flat-grey'
-				});
-	</script>
 
 </body>
 </html>
