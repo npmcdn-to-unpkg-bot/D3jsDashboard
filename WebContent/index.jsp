@@ -542,41 +542,44 @@
 
 				<!-- sidebar menu: : style can be found in sidebar.less -->
 				<ul class="sidebar-menu">
+				<li><font color="white"><i class="fa"></i>
+							<span style="font-weight:300px; font-size:16px;">Filters</span></font></li>
+						
 					<li><font color="white"><i class="fa fa-dashboard"></i>
 							<span>Month</span></font></br> <select id="monthDropDown"
-						class="form-control m-b-10">
+						class="form-control input-sm m-b-10">
 					</select></li>
 					<li><font color="white"><i class="fa fa-gear"></i> <span>Channel
 								Type</span></font></br> <select id="channelTypeDropDown"
-						class="form-control m-b-10" onchange="refreshCharts()">
+						class="form-control input-sm m-b-10" onchange="refreshCharts()">
 					</select></li>
 
 					<li><font color="white"><i class="fa fa-road"></i> <span>Channel
 								Name</span></font></br> <select id="channelNameDropDown"
-						class="form-control m-b-10">
+						class="form-control input-sm m-b-10">
 					</select></li>
 
 					<li><font color="white"><i class="fa fa-globe"></i> <span>Region</span></font></br>
-						<select id="regionDropDown" class="form-control m-b-10">
+						<select id="regionDropDown" class="form-control input-sm m-b-10">
 
 					</select></li>
 					<li><font color="white"><i class="fa fa-star"></i> <span>Product
 								Family</span></font></br> <select id="prodFamilyDropDown"
-						class="form-control m-b-10">
+						class="form-control input-sm m-b-10">
 
 					</select></li>
 					<li><font color="white"> <i class="fa fa-glass"></i><span>Policy
-								Name</span></font></br> <select id="policyNameDropDown" class="form-control m-b-10">
+								Name</span></font></br> <select id="policyNameDropDown" class="form-control input-sm m-b-10">
 
 					</select></li>
 					<li><font color="white"><i class="fa fa-user"></i> <span>Customer
 								Type</span></font></br> <select id="customerTypeDropDown"
-						class="form-control m-b-10">
+						class="form-control input-sm m-b-10">
 
 					</select></li>
 					</br>
 					<li>
-						<button onclick="refreshCharts()">Reset</button>
+						<button class="btn btn-info" style="margin-left: 15px" onclick="refreshCharts()">Reset</button>
 					</li>
 				</ul>
 			</section>
@@ -586,8 +589,8 @@
             <div class="right-side">
 
                 <section class="content">
-                    <div class="row">
-                        <div class="col-md-12">
+                    <div class="row" style="margin-bottom: 5px;">
+                       
                             <!--breadcrumbs start -->
                             <ul class="breadcrumb">
                                 <li><a href="#"><i class="fa fa-home"></i>Home</a></li>
@@ -595,11 +598,9 @@
                                 <li class="active">Customer Walk</li>
                             </ul>
                             <!--breadcrumbs end -->
-                        </div>
+                      
                     </div>
 
-			<!-- Main content -->
-			<section class="content">
 
 				<div class="row" style="margin-bottom: 5px;">
 					<div class="col-md-3">
@@ -731,6 +732,7 @@
 		</aside>
 		<!-- /.right-side -->
 
+	</div>
 	</div>
 	<!-- ./wrapper -->
 
