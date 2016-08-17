@@ -328,7 +328,8 @@
 		
 		function refreshCharts(){
 			createFilterDataTable();
-			createDonutChart ();
+			createDonutChart();
+			createWaterfallChart();
 		}
 		
 		function resetCharts(){
@@ -346,23 +347,30 @@
 		}
 		
 		function createWaterfallChart(){
-			var waterfallData = d3.nest().key(function(d) {
+			var xAxisList = [];
+			var cumulative = 0;
+			var waterfallData = [];
+			var tempWaterfallData = d3.nest().key(function(d) {
 					return d.Transaction_Detail;
 				}).rollup(function(d) {
 					return d3.sum(d, function(g) {
 						return 1;
 					});
 				}).entries(filtered_data);
-			console.log("waterfall chart...", waterfallData);
-			var xAxisList = [];
-			for(var i = 0; i < waterfallData.length; i++) {
-					xAxisList.push(waterfallData[i].key);
-				}
-			xAxisList.push("Closing");
-			console.log("waterfall chart 2...", xAxisList);
+			
 			// Transform data (i.e., finding cumulative values and total)
-			var cumulative = 0;
+			for (var i = 0; i < tempWaterfallData.length; i++) {
+				if (! (tempWaterfallData[i].key == "Other Movements" || tempWaterfallData[i].key == "New Business"
+					 || tempWaterfallData[i].key == "Lost Business" || tempWaterfallData[i].key == "Claim")) 	{
+					waterfallData.push(tempWaterfallData[i]);
+				}
+			}
 			for (var i = 0; i < waterfallData.length; i++) {
+				xAxisList.push(waterfallData[i].key);
+				if (waterfallData[i].key == "Maturity" || waterfallData[i].key == "Lapse"
+					 || waterfallData[i].key == "Surrender/Conversion"  || waterfallData[i].key == "Withdrawal/Non-Redemption")	{
+				waterfallData[i].values = - waterfallData[i].values;
+				}
 				waterfallData[i].start = cumulative;
 				cumulative += waterfallData[i].values;
 				waterfallData[i].end = cumulative;
@@ -370,6 +378,7 @@
 				waterfallData[i].class = (waterfallData[i].values >= 0) ? 'positive'
 						: 'negative'
 			}
+			xAxisList.push("Closing");
 			waterfallData.push({
 				name : 'Total',
 				key : 'Total',
@@ -378,14 +387,23 @@
 				start : 0,
 				class : 'total'
 			});
-
-			var startValueArray = [ 'data1' ];
-			var endValueArray = [ 'data2' ];
+			
+			var startValueArray = [ 'start' ];
+			var endValueArray = [ 'end' ];
 			waterfallData.forEach(function(k) {
-				startValueArray.push(k.start);
-				endValueArray.push(k.values);
+				if (k.class == 'negative')	{
+					startValueArray.push(k.end);
+					endValueArray.push(- k.values);
+				}
+				else	{
+					startValueArray.push(k.start);
+					endValueArray.push(k.values);
+				}
 			});
-
+			
+			console.log("waterfallChart 1..", waterfallData);
+			console.log("waterfallChart 2..", startValueArray);
+			console.log("waterfallChart 3..", endValueArray);
 			var waterfallChart = c3
 					.generate({
 						data : {
@@ -393,9 +411,23 @@
 									endValueArray ],
 							type : 'bar',
 							colors : {
-								data1 : '#ffffff'
+								start : '#ffffff',
+								end : '#0000ff'
 							},
-							groups : [ [ 'data2', 'data1' ] ],
+							color: function (color, d) {
+								if (waterfallData && waterfallData[d.index] && waterfallData[d.index].class
+									&& waterfallData[d.index].class == 'negative'
+									&& d && d.id && d.id === 'end')	{
+										return '#ff0000';
+								}
+								return color;
+							},
+							labels: {
+								format: {
+									end: d3.format('')
+								}
+							},
+							groups : [ [ 'start', 'end' ] ],
 							order : null
 						},
 						grid : {
@@ -405,11 +437,20 @@
 								} ]
 							}
 						},
-						/*axis : {
+						axis : {
 							x : {
 								type : 'category',
-								categories : xAxisList
-						},*/
+								categories : xAxisList,
+								tick: {
+									rotate: 60,
+									multiline: false
+								},
+								height: 50
+							}
+						},
+						legend: {
+							hide: true
+						},
 						bindto : '#chart4'
 					});
 		}
@@ -585,6 +626,7 @@
 			}
 		}
 	</script>
+
 	<!-- header logo: style can be found in header.less -->
 	<header class="header">
 		<a href="index.html" class="logo"> Italy </a>
@@ -647,9 +689,19 @@
 							<span style="font-weight:300px; font-size:16px;">Filters</span></font></li>
 						
 					<li><font color="white"><i class="fa fa-dashboard"></i>
-							<span>Month</span></font></br> <select id="monthDropDown"
+							<span>Month</span></font></br> <select disabled id="monthDropDown"
 						class="form-control input-sm m-b-10">
 					</select></li>
+					
+					<!-- <li><font color="white"><i class="fa fa-dashboard"></i>
+							<span>Month</span></font></br> <input type="text" name="daterange" value="01/01/2015 - 01/31/2015" />
+					</li>
+					<script type="text/javascript">
+						$(document).ready(function() {
+						  $('input[name="daterange"]').daterangepicker();
+						});
+					</script> -->
+					
 					<li><font color="white"><i class="fa fa-gear"></i> <span>Channel
 								Type</span></font></br> <select id="channelTypeDropDown"
 						class="form-control input-sm m-b-10" onchange="refreshCharts()">
@@ -657,25 +709,26 @@
 
 					<li><font color="white"><i class="fa fa-road"></i> <span>Channel
 								Name</span></font></br> <select id="channelNameDropDown"
-						class="form-control input-sm m-b-10">
+						class="form-control input-sm m-b-10" onchange="refreshCharts()">
 					</select></li>
 
 					<li><font color="white"><i class="fa fa-globe"></i> <span>Region</span></font></br>
-						<select id="regionDropDown" class="form-control input-sm m-b-10">
+						<select id="regionDropDown" class="form-control input-sm m-b-10" onchange="refreshCharts()">
 
 					</select></li>
 					<li><font color="white"><i class="fa fa-star"></i> <span>Product
 								Family</span></font></br> <select id="prodFamilyDropDown"
-						class="form-control input-sm m-b-10">
+						class="form-control input-sm m-b-10" onchange="refreshCharts()">
 
 					</select></li>
 					<li><font color="white"> <i class="fa fa-glass"></i><span>Policy
-								Name</span></font></br> <select id="policyNameDropDown" class="form-control input-sm m-b-10">
+								Name</span></font></br> <select id="policyNameDropDown"
+						class="form-control input-sm m-b-10" onchange="refreshCharts()">
 
 					</select></li>
 					<li><font color="white"><i class="fa fa-user"></i> <span>Customer
 								Type</span></font></br> <select id="customerTypeDropDown"
-						class="form-control input-sm m-b-10">
+						class="form-control input-sm m-b-10" onchange="refreshCharts()">
 
 					</select></li>
 					</br>
