@@ -167,9 +167,9 @@
 											}
 										});
 								//customerCountKPI = customerCountKPI + currMonthCC;
-								lastMonthChangeCC = ((customerCountKPI - prevMonthCC) / prevMonthCC) * 100;
-								lastMonthChangePD = ((totalPolicy - prevMonthPD) / prevMonthPD) * 100;
-								lastMonthChangeGWP = ((totalPaymentCost - prevMonthGWP) / prevMonthGWP) * 100;
+								lastMonthChangeCC = ((customerCountKPI - prevMonthCC) / prevMonthCC);
+								lastMonthChangePD = ((totalPolicy - prevMonthPD) / prevMonthPD);
+								lastMonthChangeGWP = ((totalPaymentCost - prevMonthGWP) / prevMonthGWP);
 								item.push(customerCountKPI);
 								//        console.log(currMonthCC);
 								//      console.log(prevMonthCC);
@@ -184,9 +184,9 @@
 
 							});
 			policyDensityKPI = (totalPolicy / customerCountKPI);
-			firstMonthChangeCC = ((customerCountKPI - firstMonthCC) / firstMonthCC) * 100;
-			firstMonthChangePD = ((totalPolicy - firstMonthPD) / firstMonthPD) * 100;
-			firstMonthChangeGWP = ((totalPaymentCost - firstMonthGWP) / firstMonthGWP) * 100;
+			firstMonthChangeCC = ((customerCountKPI - firstMonthCC) / firstMonthCC);
+			firstMonthChangePD = ((totalPolicy - firstMonthPD) / firstMonthPD);
+			firstMonthChangeGWP = ((totalPaymentCost - firstMonthGWP) / firstMonthGWP);
 
 			var reserveKPI = totalPaymentCost * 0.75;
 			var amtFormat = d3.format(",.0f");
@@ -650,16 +650,15 @@
 		<nav class="navbar navbar-static-top" role="navigation">
 			<!-- Sidebar toggle button-->
 			<a href="#" class="navbar-btn sidebar-toggle" data-toggle="offcanvas"
-				role="button"> <span class="sr-only">Toggle navigation</span> <span
+				role="button"> <span class="sr-only">Toggle navigation</span><span
 				class="icon-bar"></span> <span class="icon-bar"></span> <span
 				class="icon-bar"></span>
-			</a>
-			
-			
+			</a> <span class="siteTitle">Customer Walk</span>
+
 			<div class="navbar-right">
-			
+
 				<ul class="nav navbar-nav">
-				
+
 					<!-- User Account: style can be found in dropdown.less -->
 					<li class="dropdown user user-menu"><a href="#"
 						class="dropdown-toggle" data-toggle="dropdown"> <i
@@ -701,14 +700,14 @@
 
 				<!-- sidebar menu: : style can be found in sidebar.less -->
 				<ul class="sidebar-menu">
-				<li><font color="white"><i class="fa"></i>
-							<span style="font-weight:300px; font-size:16px;">Filters</span></font></li>
-						
+					<li><font color="white"><i class="fa"></i> <span
+							style="font-weight: 300px; font-size: 16px;">Filters</span></font></li>
+
 					<li><font color="white"><i class="fa fa-dashboard"></i>
 							<span>Month</span></font></br> <select disabled id="monthDropDown"
 						class="form-control input-sm m-b-10">
 					</select></li>
-					
+
 					<!-- <li><font color="white"><i class="fa fa-dashboard"></i>
 							<span>Month</span></font></br> <input type="text" name="daterange" value="01/01/2015 - 01/31/2015" />
 					</li>
@@ -717,7 +716,7 @@
 						  $('input[name="daterange"]').daterangepicker();
 						});
 					</script> -->
-					
+
 					<li><font color="white"><i class="fa fa-gear"></i> <span>Channel
 								Type</span></font></br> <select id="channelTypeDropDown"
 						class="form-control input-sm m-b-10" onchange="refreshCharts()">
@@ -729,7 +728,8 @@
 					</select></li>
 
 					<li><font color="white"><i class="fa fa-globe"></i> <span>Region</span></font></br>
-						<select id="regionDropDown" class="form-control input-sm m-b-10" onchange="refreshCharts()">
+						<select id="regionDropDown" class="form-control input-sm m-b-10"
+						onchange="refreshCharts()">
 
 					</select></li>
 					<li><font color="white"><i class="fa fa-star"></i> <span>Product
@@ -749,26 +749,17 @@
 					</select></li>
 					</br>
 					<li>
-						<button class="btn btn-info" style="margin-left: 15px" onclick="resetCharts()">Reset</button>
+						<button class="btn btn-info" style="margin-left: 15px"
+							onclick="resetCharts()">Reset</button>
 					</li>
 				</ul>
 			</section>
 			<!-- /.sidebar -->
 		</aside>
 		<!-- Right side column. Contains the navbar and content of the page -->
-            <div class="right-side">
+		<div class="right-side">
 
-                <section class="content">
-                    <div class="row" style="margin-bottom: 5px;">
-                            <!--breadcrumbs start -->
-                            <ul class="breadcrumb">
-                                <li><a href="#"><i class="fa fa-home"></i>Home</a></li>
-                                <li><a href="#">Dashboard</a></li>
-                                <li class="active">Customer Walk</li>
-                            </ul>
-                            <!--breadcrumbs end -->
-                    </div>
-
+			<section class="content">
 				<div class="row" style="margin-bottom: 5px;">
 					<div class="col-md-3">
 						<div class="sm-st clearfix">
@@ -896,10 +887,10 @@
 			</section>
 			<!-- /.content -->
 			<div class="footer-main">Copyright &copy Zurich EDAA, 2016</div>
-		</aside>
-		<!-- /.right-side -->
+			</aside>
+			<!-- /.right-side -->
 
-	</div>
+		</div>
 	</div>
 	<!-- ./wrapper -->
 
