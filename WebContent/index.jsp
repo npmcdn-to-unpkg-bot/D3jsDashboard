@@ -281,6 +281,10 @@
 			populatecustomerTypeFilterList();
 			
 			var categoryLineChart = c3.generate({
+				size: {
+			        height: 260,
+			        width: 620
+			    },
 				data : {
 					columns : modData
 
@@ -297,6 +301,10 @@
 			//    console.log(category);
 			//console.log(modData);
 			var totalLineChart = c3.generate({
+				size: {
+			        height: 260,
+			        width: 620
+			    },
 				data : {
 					columns : totalModData
 
@@ -406,19 +414,23 @@
 			console.log("waterfallChart 3..", endValueArray);
 			var waterfallChart = c3
 					.generate({
+						size: {
+					        height: 260,
+					        width: 620
+					    },
 						data : {
 							columns : [ startValueArray,
 									endValueArray ],
 							type : 'bar',
 							colors : {
 								start : '#ffffff',
-								end : '#0000ff'
+								end : '#008cd0'
 							},
 							color: function (color, d) {
 								if (waterfallData && waterfallData[d.index] && waterfallData[d.index].class
 									&& waterfallData[d.index].class == 'negative'
 									&& d && d.id && d.id === 'end')	{
-										return '#ff0000';
+										return '#FFA500';
 								}
 								return color;
 							},
@@ -479,6 +491,10 @@
 			//Create Donut chart
 			var currentSlice;
 			var donutChart = c3.generate({
+				size: {
+			        height: 260,
+			        width: 620
+			    },
 				data : {
 					columns : modData,
 					type : 'donut',
@@ -640,8 +656,8 @@
 			</a>
 			
 			
-			
 			<div class="navbar-right">
+			
 				<ul class="nav navbar-nav">
 				
 					<!-- User Account: style can be found in dropdown.less -->
